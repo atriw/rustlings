@@ -42,13 +42,13 @@ fn result_with_list() -> Result<Vec<i32>, DivisionError> {
     let numbers = vec![27, 297, 38502, 81];
     numbers
         .into_iter()
-        .map(|n| divide(n, 27))
-        .fold(Ok(vec![]), |acc, result| 
-        result.and_then(|r| 
-            acc.and_then(|mut vec| {
-                vec.push(r); 
-                Ok(vec)
-            })))
+        .map(|n| divide(n, 27)).collect()
+        // .fold(Ok(vec![]), |acc, result| 
+        // result.and_then(|r| 
+        //     acc.and_then(|mut vec| {
+        //         vec.push(r); 
+        //         Ok(vec)
+        //     })))
 }
 
 // Complete the function and return a value of the correct type so the test passes.
