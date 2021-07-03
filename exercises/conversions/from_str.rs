@@ -51,15 +51,9 @@ impl FromStr for Person {
             return Err(Box::new(TryFromStrError::EmptyString));
         }
         let mut split = s.split(',');
-        let name = match split.next() {
-            Some("") | None => return Err(Box::new(TryFromStrError::EmptyName)),
-            Some(name) => name,
-        };
-        let age = match split.next() {
-            None => return Err(Box::new(TryFromStrError::EmptyAge)),
-            Some(age) => age.parse::<usize>()?
-        };
-        if let Some(_) = split.next() {
+        let name = split.next().filter(|s| !s.is_empty()).ok_or(Box::new(TryFromStrError::EmptyName))?;
+        let age = split.next().and_then(|s| s.parse::<usize>().ok()).ok_or(Box::new(TryFromStrError::EmptyAge))?;
+        if split.next().is_some() {
             return Err(Box::new(TryFromStrError::InvalidFormat));
         }
         Ok(Person{
