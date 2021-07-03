@@ -41,15 +41,11 @@ impl From<&str> for Person {
         }
         let mut split = s.split(',');
         let name = match split.next() {
-            Some("") => return Default::default(),
+            Some("") | None => return Default::default(),
             Some(name) => name,
-            None => return Default::default()
         };
-        let age = match split.next() {
-            Some(age) => match age.parse::<usize>() {
-                Ok(age) => age,
-                _ => return Default::default()
-            }
+        let age = match split.next().and_then(|age| age.parse::<usize>().ok()) {
+            Some(age) => age,
             None => return Default::default()
         };
         if let Some(_) = split.next() {
