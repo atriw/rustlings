@@ -3,6 +3,7 @@
 // on strings to generate an object of the implementor type.
 // You can read more about it at https://doc.rust-lang.org/std/str/trait.FromStr.html
 use std::error;
+use std::fmt;
 use std::str::FromStr;
 
 #[derive(Debug)]
@@ -11,7 +12,28 @@ struct Person {
     age: usize,
 }
 
-// I AM NOT DONE
+
+
+#[derive(Debug)]
+enum TryFromStrError {
+   EmptyString,
+   EmptyName,
+   EmptyAge,
+   InvalidFormat,
+}
+
+impl error::Error for TryFromStrError {}
+
+impl fmt::Display for TryFromStrError {
+    fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+        match self {
+            EmptyString => write!(f, "empty string"),
+            EmptyName => write!(f, "empty name"),
+            EmptyAge => write!(f, "empty age"),
+            InvalidFormat => write!(f, "invalid format"),
+        }
+    }
+}
 
 // Steps:
 // 1. If the length of the provided string is 0, an error should be returned
@@ -22,10 +44,28 @@ struct Person {
 //    with something like `"4".parse::<usize>()`
 // 5. If while extracting the name and the age something goes wrong, an error should be returned
 // If everything goes well, then return a Result of a Person object
-
 impl FromStr for Person {
     type Err = Box<dyn error::Error>;
     fn from_str(s: &str) -> Result<Person, Self::Err> {
+        if s.len() == 0 {
+            return Err(Box::new(TryFromStrError::EmptyString));
+        }
+        let mut split = s.split(',');
+        let name = match split.next() {
+            Some("") | None => return Err(Box::new(TryFromStrError::EmptyName)),
+            Some(name) => name,
+        };
+        let age = match split.next() {
+            None => return Err(Box::new(TryFromStrError::EmptyAge)),
+            Some(age) => age.parse::<usize>()?
+        };
+        if let Some(_) = split.next() {
+            return Err(Box::new(TryFromStrError::InvalidFormat));
+        }
+        Ok(Person{
+            name: name.to_string(),
+            age
+        })
     }
 }
 
